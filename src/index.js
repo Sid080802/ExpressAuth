@@ -5,11 +5,21 @@ const collection = require('./mongodb')
 const app = express()
 const cloudinary = require('./cloudinary')
 const multer = require('multer')
-
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 app.use(express.static(path.join(__dirname, '../public')));
 
-const upload = multer({ dest: 'uploads/' });    // Temporary file storage
+// Configure Multer-Cloudinary Storage
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+      folder: 'images', // Cloudinary folder to store images
+      format: async (req, file) => 'jpg', // Set default format
+      public_id: (req, file) => `${Date.now()}_${file.originalname.split('.')[0]}` // Unique file name
+    },
+  });
+  
+  const upload = multer({ storage }); // Use Cloudinary storage
 
 const templatePath = path.join(__dirname, '../templates')
 
@@ -35,35 +45,25 @@ app.get("/home", (req,res)=>{
 });
 
 
-app.post("/signup", upload.single('image'), async(req,res)=>{
-    
+app.post("/signup", upload.single('image'), async (req, res) => {
     try {
-
-        // Upload the file to Cloudinary
-        const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: 'images' });
-
+        // Multer-Cloudinary automatically handles file upload; req.file contains the file details
         const data = {
-        username:req.body.username,
-        email:req.body.email,
-        password:req.body.password,
-        confirmPassword:req.body.confirmPassword,
-        imageUrl: result.secure_url,
-        }
+            username: req.body.username,
+            email: req.body.email,
+            password: req.body.password,
+            confirmPassword: req.body.confirmPassword,
+            imageUrl: req.file.path, // Cloudinary URL
+        };
 
-        await collection.create(data)
-        // await collection.save();
-
-        // res.render('login')
+        await collection.create(data);
         res.render('login', { signupSuccess: "Account created successfully! Please login." });
-    }
-
-    catch (err) {
+    } catch (err) {
         console.error(err);
         res.status(500).send('Error uploading image');
-      }
+    }
+});
 
-})
 
 // Handle Login Form Submission
 app.post("/login", async (req, res) => {
