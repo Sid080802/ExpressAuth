@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Welcome</title>
+    <link rel="stylesheet" href="/home.css"> <!-- Link to a custom stylesheet for the home page -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+   
+
+    <div class="home-container">
+        <h1 class="welcome-message">Welcome to the Home Page!</h1>
+        
+        <!-- Display login success message if it exists -->
+        {{#if message}}
+            <div class="success-message">
+                <p>{{message}}</p>
+            </div>
+        {{/if}}
+
+        <!-- Optionally add a Logout button -->
+        <a href="/" class="logout-btn">Logout</a>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>
